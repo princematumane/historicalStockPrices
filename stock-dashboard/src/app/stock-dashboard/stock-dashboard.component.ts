@@ -20,7 +20,9 @@ import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
 import {
   BehaviorSubject,
+  catchError,
   Observable,
+  of,
   startWith,
   Subject,
   switchMap,
@@ -56,6 +58,7 @@ export class StockDashboardComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
 
   loading$ = new BehaviorSubject<boolean>(false);
+  error$ = new Subject<string>();
 
   constructor(private stockService: StockService) {}
 
@@ -64,6 +67,7 @@ export class StockDashboardComponent implements OnInit, OnDestroy {
       startWith('AAPL'),
       switchMap((symbol) => {
         this.loading$.next(true);
+        this.error$.next('');
         return this.fetchStockData(symbol ?? 'AAPL');
       }),
       switchMap((stock) => {
@@ -75,7 +79,13 @@ export class StockDashboardComponent implements OnInit, OnDestroy {
   }
 
   fetchStockData(symbol: string): Observable<Stock> {
-    return this.stockService.getStockData(symbol);
+    return this.stockService.getStockData(symbol).pipe(
+      catchError((error) => {
+        this.error$.next(error);
+        this.loading$.next(false);
+        return of({} as Stock);
+      })
+    );
   }
 
   ngOnDestroy() {
