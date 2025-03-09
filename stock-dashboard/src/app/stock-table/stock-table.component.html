@@ -1,0 +1,43 @@
+<div class="table-container">
+  <table mat-table [dataSource]="dataSource" matSort class="mat-elevation-z8">
+    <ng-container matColumnDef="date">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>Date</th>
+      <td mat-cell *matCellDef="let price">
+        {{ price.date | date : "MMM d, y" }}
+      </td>
+    </ng-container>
+
+    <ng-container matColumnDef="open">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>Open</th>
+      <td mat-cell *matCellDef="let price">{{ price.open }}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="high">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>High</th>
+      <td mat-cell *matCellDef="let price">{{ price.high }}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="low">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>Low</th>
+      <td mat-cell *matCellDef="let price">{{ price.low }}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="close">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>Close</th>
+      <td mat-cell *matCellDef="let price">{{ price.close }}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="volume">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>Volume</th>
+      <td mat-cell *matCellDef="let price">{{ price.volume | number }}</td>
+    </ng-container>
+
+    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+    <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+  </table>
+
+  <mat-paginator
+    [pageSizeOptions]="[5, 10, 20]"
+    showFirstLastButtons
+  ></mat-paginator>
+</div>

@@ -1,0 +1,25 @@
+<mat-card class="mat-elevation-z8">
+  <mat-card-header>
+    <mat-card-title class="title">
+      {{ stock.symbol }} Daily Close Price
+    </mat-card-title>
+  </mat-card-header>
+
+  <mat-card-content>
+    <ngx-charts-line-chart
+      [view]="view"
+      [results]="filteredChartData"
+      [gradient]="gradient"
+      [xAxis]="showXAxis"
+      [yAxis]="showYAxis"
+      [legend]="showLegend"
+      [showXAxisLabel]="showXAxisLabel"
+      [showYAxisLabel]="showYAxisLabel"
+      [xAxisLabel]="xAxisLabel"
+      [yAxisLabel]="yAxisLabel"
+      [autoScale]="autoScale"
+      (legendLabelClick)="onLegendLabelClick($event)"
+    >
+    </ngx-charts-line-chart>
+  </mat-card-content>
+</mat-card>
