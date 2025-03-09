@@ -3,7 +3,9 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using StackExchange.Redis;
 using StockPricesDashboardAPI.Domain.Model;
+using StockPricesDashboardAPI.Exceptions;
 using System.Globalization;
+using System.Net;
 
 namespace StockPricesDashboardAPI.Services
 {
@@ -12,6 +14,9 @@ namespace StockPricesDashboardAPI.Services
         private readonly HttpClient _httpClient;
         private readonly RedisService _redisService;
         private readonly AlphaVantageConfig _alphaVantageConfig;
+
+        private static int _apiCallCount = 0;
+        private static DateTime _lastResetTime = DateTime.UtcNow;
 
         public StockPriceService(RedisService redisService, HttpClient httpClient,
             IOptions<AlphaVantageConfig> alphaVantageConfig)
@@ -27,6 +32,11 @@ namespace StockPricesDashboardAPI.Services
 
         public async Task<Stock> GetStockPricesAsync(string symbol)
         {
+            if (string.IsNullOrEmpty(symbol))
+            {
+                throw new ArgumentNullException(nameof(symbol), "Stock symbol cannot be null or empty.");
+            }
+
             string cacheKey = $"stock:{symbol}";
             //var cachedData = await _redisService.GetAsync<Stock>(cacheKey);
             //if (cachedData != null)
@@ -34,32 +44,51 @@ namespace StockPricesDashboardAPI.Services
             //    return cachedData;
             //}
 
-            var url = $"query?function=TIME_SERIES_DAILY&symbol={symbol}&outputsize=compact&datatype=json";
-            var response = await _httpClient.GetAsync(url);
-
-            response.EnsureSuccessStatusCode();
-            var content = await response.Content.ReadAsStringAsync();
-            var data = JsonConvert.DeserializeObject<AlphaVantageResponse>(content);
-
-            var stock = new Stock
+            if (_apiCallCount >= 5 && (DateTime.UtcNow - _lastResetTime).TotalMinutes < 1)
             {
-                Symbol = symbol,
-                Prices = data.TimeSeries.Select(ts => new StockPrice
+                throw new ApiRateLimitExceededException();
+            }
+
+            _apiCallCount++;
+
+            if ((DateTime.UtcNow - _lastResetTime).TotalMinutes >= 1)
+            {
+                _apiCallCount = 0;
+                _lastResetTime = DateTime.UtcNow;
+            }
+
+                var url = $"query?function=TIME_SERIES_DAILY&symbol={symbol}&outputsize=compact&datatype=json";
+                var response = await _httpClient.GetAsync(url);
+
+                if (response.StatusCode == (HttpStatusCode)429)
+                {
+                    throw new ApiRateLimitExceededException();
+                }
+
+                response.EnsureSuccessStatusCode();
+                var content = await response.Content.ReadAsStringAsync();
+                var data = JsonConvert.DeserializeObject<AlphaVantageResponse>(content);
+
+                var stock = new Stock
                 {
                     Symbol = symbol,
-                    Date = DateTime.Parse(ts.Key),
-                    Open = decimal.Parse(ts.Value.Open, CultureInfo.InvariantCulture),
-                    High = decimal.Parse(ts.Value.High, CultureInfo.InvariantCulture),
-                    Low = decimal.Parse(ts.Value.Low, CultureInfo.InvariantCulture),
-                    Close = decimal.Parse(ts.Value.Close, CultureInfo.InvariantCulture),
-                    Volume = long.Parse(ts.Value.Volume)
+                    Prices = data.TimeSeries.Select(ts => new StockPrice
+                    {
+                        Symbol = symbol,
+                        Date = DateTime.Parse(ts.Key),
+                        Open = decimal.Parse(ts.Value.Open, CultureInfo.InvariantCulture),
+                        High = decimal.Parse(ts.Value.High, CultureInfo.InvariantCulture),
+                        Low = decimal.Parse(ts.Value.Low, CultureInfo.InvariantCulture),
+                        Close = decimal.Parse(ts.Value.Close, CultureInfo.InvariantCulture),
+                        Volume = long.Parse(ts.Value.Volume)
 
-                }).ToList()
-            };
+                    }).ToList()
+                };
 
-            // await _redisService.SetAsync(cacheKey, stock, TimeSpan.FromMinutes(10));
+                await _redisService.SetAsync(cacheKey, stock, TimeSpan.FromMinutes(10));
 
-            return stock;
+                return stock;
+
         }
     }
 }

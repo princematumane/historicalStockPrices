@@ -24,7 +24,7 @@ export class StockChartComponent {
   showXAxisLabel = true;
   xAxisLabel = 'Date';
   showYAxisLabel = true;
-  yAxisLabel = 'Price';
+  yAxisLabel = 'Value';
   autoScale = true;
 
   ngOnChanges(): void {

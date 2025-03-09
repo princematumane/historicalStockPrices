@@ -1,34 +1,44 @@
-@let stock = stock$ | async;
+@let stock = stock$ | async; @let loading =loading$ | async;
+
 <ng-container *ngIf="stock" else noDataTemplate>
   <mat-toolbar class="custom-toolbar">
-    <mat-icon class="logo-icon">bar_chart</mat-icon>
-    <span class="title">Stock Price Dashboard</span>
+    <mat-icon class="logo-icon" fontIcon="bar_chart"></mat-icon>
+    <span class="title">Stock Dashboard</span>
 
     <span class="spacer"></span>
-
-    <mat-form-field appearance="outline" class="stock-selector">
-      <mat-label>Select a Stock</mat-label>
-      <mat-select [formControl]="stockControl">
-        <mat-option
-          *ngFor="let symbol of ['AAPL', 'MSFT', 'GOOGL', 'AMZN', 'FB']"
-          [value]="symbol"
-        >
-          {{ symbol }}
-        </mat-option>
-      </mat-select>
-    </mat-form-field>
   </mat-toolbar>
 
+  <mat-form-field appearance="outline" class="stock-selector">
+    <mat-label>Select a Stock</mat-label>
+    <mat-select [formControl]="stockControl">
+      <mat-option
+        *ngFor="let symbol of ['AAPL', 'MSFT', 'GOOGL', 'AMZN', 'FB']"
+        [value]="symbol"
+      >
+        {{ symbol }}
+      </mat-option>
+    </mat-select>
+  </mat-form-field>
+
   <div class="dashboard-container">
-    <mat-card class="stock-card">
+    <mat-card class="stock-card" *ngIf="!loading" else skeletonLoader>
       <app-stock-chart [stock]="stock"></app-stock-chart>
     </mat-card>
 
-    <mat-card class="stock-card">
+    <mat-card class="stock-card" *ngIf="!loading" else skeletonLoader>
       <app-stock-table [stock]="stock"></app-stock-table>
     </mat-card>
   </div>
 </ng-container>
 <ng-template #noDataTemplate>
   <p>No data available.</p>
+</ng-template>
+
+<ng-template #skeletonLoader>
+  <ngx-skeleton-loader
+    [count]="1"
+    animation="progress"
+    [appearance]="'line'"
+    [theme]="{ height: '100px', margin: '0px' }"
+  ></ngx-skeleton-loader>
 </ng-template>

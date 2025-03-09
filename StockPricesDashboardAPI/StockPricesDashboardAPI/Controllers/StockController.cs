@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using StockPricesDashboardAPI.Domain.Model;
+using StockPricesDashboardAPI.Exceptions;
 using StockPricesDashboardAPI.Services;
 
 namespace StockPricesDashboardAPI.Controllers
@@ -18,8 +19,19 @@ namespace StockPricesDashboardAPI.Controllers
         [HttpGet("{symbol}")]
         public async Task<ActionResult<IEnumerable<StockPrice>>> GetStockPrices(string symbol)
         {
-            var stockPrices = await _stockService.GetStockPricesAsync(symbol);
-            return Ok(stockPrices);
+            try
+            {
+                var stockPrices = await _stockService.GetStockPricesAsync(symbol);
+                return Ok(stockPrices);
+            }
+            catch (ApiRateLimitExceededException ex)
+            {
+                return StatusCode(429, ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
         }
     }
 }
