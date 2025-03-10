@@ -38,11 +38,11 @@ namespace StockPricesDashboardAPI.Services
             }
 
             string cacheKey = $"stock:{symbol}";
-            //var cachedData = await _redisService.GetAsync<Stock>(cacheKey);
-            //if (cachedData != null)
-            //{
-            //    return cachedData;
-            //}
+            var cachedData = await _redisService.GetAsync<Stock>(cacheKey);
+            if (cachedData != null)
+            {
+                return cachedData;
+            }
 
             if (_apiCallCount >= 5 && (DateTime.UtcNow - _lastResetTime).TotalMinutes < 1)
             {

@@ -108,3 +108,10 @@ The Stock Price Dashboard is a web application that displays historical stock pr
    ```
    https://localhost:7298
    ```
+
+### Docker (Redis)
+
+1. Download docker, Then run
+   ```bash
+      docker run --name my-redis -p 6379:6379 -d redis
+   ```
