@@ -100,11 +100,22 @@ The Stock Price Dashboard is a web application that displays historical stock pr
    ```bash
    dotnet restore
    ```
-3. Start the backend server:
+3. Update appsettings based on your config
+   ```
+   "AlphaVantage": {
+    "ApiKey": "{{yourApiKey}}",
+    "BaseUrl": "{{baseUrl}}",
+    "Host": "{{hostName}}"
+   },
+   "RedisSettings": {
+    "ConnectionString": "{{rediUrl}}"
+   }
+   ```
+4. Start the backend server:
    ```bash
    dotnet run
    ```
-4. The backend API will be available at:
+5. The backend API will be available at:
    ```
    https://localhost:7298
    ```
@@ -112,6 +123,7 @@ The Stock Price Dashboard is a web application that displays historical stock pr
 ### Docker (Redis)
 
 1. Download docker, Then run
-   ```bash
-      docker run --name my-redis -p 6379:6379 -d redis
-   ```
+
+```bash
+   docker run --name my-redis -p 6379:6379 -d redis
+```
