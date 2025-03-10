@@ -70,22 +70,23 @@ The Stock Price Dashboard is a web application that displays historical stock pr
 
 ## Installation
 
+- . Clone the repository:
+  ```bash
+  git clone https://github.com/princematumane/historicalStockPrices.git
+  cd historicalStockPrices/stock-dashboard
+  ```
+
 ### Frontend (Angular)
 
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/princematumane/historicalStockPrices.git
-   cd historicalStockPrices/stock-dashboard
-   ```
-2. Install dependencies:
+1. Install dependencies:
    ```bash
    npm install
    ```
-3. Start the Angular development server:
+2. Start the Angular development server:
    ```bash
    ng serve
    ```
-4. Open the application in your browser:
+3. Open the application in your browser:
    ```
    http://localhost:4200
    ```
